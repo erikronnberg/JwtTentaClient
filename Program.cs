@@ -1,6 +1,7 @@
 ﻿using JwtTentaClient.Data;
 using JwtTentaClient.Models;
 using JwtTentaClient.Models.Entities;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -17,35 +18,57 @@ namespace JwtTentaClient
         protected static readonly DataContext context = new DataContext();
         static async Task Main(string[] args)
         {
-            try
-            {
-                Console.ReadKey();
-                Console.WriteLine("Hello World!");
-                //var resp = await PostUser();
-                //var resp = await AuthUser();
-                var resp = await GetAllUsers("eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTUxMiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiZXJpa3Jvbm5iZXJnIiwianRpIjoiMGU2NGQyZmItOGMzNC00MDMxLWIwMmMtNjliOWZlMWMyZDFjIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjpbIkVtcGxveWVlIiwiQWRtaW4iXSwiZXhwIjoxNjAwNzgyODc2LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjYxOTU1IiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo0MjAwIn0.F_ee0knE6eBAeYWmGMkoq9hfFabinPELMTY5Pl30a1kk-v7YsZb3IuKp-9_DG0TVBVSYjKscr736SBARuGY62w");
+            bool menuBool = true;
 
-                foreach (var x in resp)
-                {
-                    Console.WriteLine(x.Username + "\n");
-                }
-                //Console.WriteLine(resp.ToString());
-                Console.ReadKey();
-            }
-            catch (Exception e)
+            while (menuBool)
             {
-                Console.WriteLine(e);
-                Console.ReadKey();
+                Console.Clear();
+                Console.WriteLine("Northwind API");
+                Console.WriteLine("==================================");
+                Console.WriteLine("Do stuff (s)");
+                Console.WriteLine("Exit (e)");
+
+                string menu = Console.ReadLine();
+
+                switch (menu)
+                {
+                    case "s":
+                        try
+                        {
+                            var resPost = await PostUser();
+                            //var resAuth = await AuthUser();
+                            //var resGetAll = await GetAllUsers(resAuth.JwtToken);
+
+                            Console.WriteLine(resPost.ToString() + "\n" + "\n");
+                            //Console.WriteLine(resAuth.ToString() + "\n" + "\n");
+
+                            //foreach (var x in resGetAll)
+                            //{
+                            //    Console.WriteLine(x.Username + "\n");
+                            //}
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            Console.ReadKey();
+                            break;
+                        }
+
+                        Console.WriteLine("Press any key to continue...");
+                        Console.ReadKey();
+                        break;
+
+                    case "e":
+                    default:
+                        menuBool = false;
+                        break;
+                }
             }
         }
 
-        public static async Task<AccountResponse> PostUser()
+        public static async Task<string> PostUser()
         {
-            var user = new RegisterRequest();
-            user.Email = "test@test.com";
-            user.Password = "!Grodan1234";
-            user.Username = "erik1";
-            user.EmployeeID = 2;
+            var user = new RegisterRequest { Email = "test@test.com", Password = "!Password1", Username = "test", EmployeeID = 1, };
 
             var endpoint = "user/register";
             var jsonRequest = JsonConvert.SerializeObject(user);
@@ -54,17 +77,17 @@ namespace JwtTentaClient
             {
                 var response = await client.PostAsync(url + endpoint, postRequest);
                 if (response.IsSuccessStatusCode == false)
-                    return null;
+                    return response.StatusCode.ToString();
 
                 var jsonResult = await response.Content.ReadAsStringAsync();
                 var result = JsonConvert.DeserializeObject<AccountResponse>(jsonResult);
-                return result;
+                return result.ToString();
             }
         }
 
         public static async Task<AuthenticateResponse> AuthUser()
         {
-            var user = new AuthenticateRequest { Email = "erik.rnnberg@gmail.com", Password = "!Groda1234567" };
+            var user = new AuthenticateRequest { Email = "test@test.com", Password = "!Password1" };
             var endpoint = "user/login";
             var jsonRequest = JsonConvert.SerializeObject(user);
             var postRequest = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
