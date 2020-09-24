@@ -4,9 +4,11 @@ using JwtTentaClient.Models;
 using JwtTentaClient.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -81,7 +83,7 @@ namespace JwtTentaClient
                                     Console.WriteLine("Username: " + x.Username + " Created: " + x.Created + "\n");
                                 }
                             }
-                            else Console.WriteLine("No objects found\n");
+                            else Console.WriteLine("No objects found or token is expired\n");
 
                             var resDelete = await DeleteUser(resAuth.JwtToken, userToDelete);
                             Console.WriteLine(resDelete + "\n" + "\n");
@@ -94,7 +96,7 @@ namespace JwtTentaClient
                                     Console.WriteLine(x.OrderDate + x.ShipCountry + "\n");
                                 }
                             }
-                            else Console.WriteLine("No objects found\n");
+                            else Console.WriteLine("No objects found or token is expired\n");
 
 
                             var resGetAll = await GetAllOrders(resAuth.JwtToken);
@@ -105,7 +107,7 @@ namespace JwtTentaClient
                                     Console.WriteLine(x.OrderDate + x.ShipCountry + "\n");
                                 }
                             }
-                            else Console.WriteLine("No objects found\n");
+                            else Console.WriteLine("No objects found or token is expired\n");
 
                             var resGetCountry = await GetCountryOrders(resAuth.JwtToken, "USA");
                             if (resGetCountry != null)
@@ -115,7 +117,7 @@ namespace JwtTentaClient
                                     Console.WriteLine(x.OrderDate + x.ShipCountry + "\n");
                                 }
                             }
-                            else Console.WriteLine("No objects found\n");
+                            else Console.WriteLine("No objects found or token is expired\n");
                         }
                         catch (Exception e)
                         {
@@ -136,6 +138,16 @@ namespace JwtTentaClient
             }
         }
 
+        public static bool TokenValidation(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var securityToken = handler.ReadJwtToken(token);
+            if (DateTime.UtcNow > securityToken.ValidTo)
+                return false;
+            else
+                return true;
+        }
+
         public static async Task<string> PostUser(RegisterRequest request)
         {
             var endpoint = "user/register";
@@ -154,6 +166,9 @@ namespace JwtTentaClient
         }
         public static async Task<string> PostAdmin(string token)
         {
+            if (!TokenValidation(token))
+                return "Expired token";
+
             var user = new RegisterRequest { Email = "test@test.com", Password = "!Password1", Username = "test", EmployeeID = 1, };
 
             var endpoint = "user/register-admin";
@@ -173,6 +188,9 @@ namespace JwtTentaClient
         }
         public static async Task<string> UpdateUser(string token, UpdateRequest request)
         {
+            if (!TokenValidation(token))
+                return "Expired token";
+
             var endpoint = "user/update";
             var jsonRequest = JsonConvert.SerializeObject(request);
             var postRequest = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
@@ -190,6 +208,9 @@ namespace JwtTentaClient
         }
         public static async Task<string> DeleteUser(string token, string userName)
         {
+            if (!TokenValidation(token))
+                return "Expired token";
+
             var endpoint = "user/delete";
             using (var client = new HttpClient())
             {
@@ -243,6 +264,9 @@ namespace JwtTentaClient
         }
         public static async Task<IEnumerable<AccountResponse>> GetAllUsers(string token)
         {
+            if (!TokenValidation(token))
+                return null;
+
             var endpoint = "user/get-all-users";
             using (var client = new HttpClient())
             {
@@ -258,6 +282,9 @@ namespace JwtTentaClient
         }
         public static async Task<IEnumerable<OrderResponse>> GetMyOrders(string token, int id)
         {
+            if (!TokenValidation(token))
+                return null;
+
             var endpoint = "order/get-my-orders";
             using (var client = new HttpClient())
             {
@@ -277,6 +304,9 @@ namespace JwtTentaClient
         }
         public static async Task<IEnumerable<OrderResponse>> GetCountryOrders(string token, string country)
         {
+            if (!TokenValidation(token))
+                return null;
+
             var endpoint = "order/get-orders-by-country";
             using (var client = new HttpClient())
             {
@@ -296,6 +326,9 @@ namespace JwtTentaClient
         }
         public static async Task<IEnumerable<OrderResponse>> GetAllOrders(string token)
         {
+            if (!TokenValidation(token))
+                return null;
+
             var endpoint = "order/get-all-orders";
             using (var client = new HttpClient())
             {
