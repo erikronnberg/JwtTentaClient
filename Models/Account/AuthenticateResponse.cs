@@ -10,8 +10,9 @@ namespace JwtTentaClient.Models
         public DateTime Created { get; set; }
         public DateTime? Updated { get; set; }
         public string JwtToken { get; set; }
-
         public string RefreshToken { get; set; }
+        public bool Success { get; set; }
+        public string ErrorMessage { get; set; }
 
         public override string ToString()
         {

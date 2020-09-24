@@ -22,6 +22,15 @@ namespace JwtTentaClient
         protected static readonly DataContext context = new DataContext();
         static async Task Main(string[] args)
         {
+            RegisterRequest registerRequest1 = new RegisterRequest { Email = "test1@test.com", Password = "!Password1", Username = "test1", EmployeeID = 1, };
+            RegisterRequest registerRequest2 = new RegisterRequest { Email = "test2@test.com", Password = "!Password2", Username = "test2", EmployeeID = 2, };
+            RegisterRequest registerRequest3 = new RegisterRequest { Email = "test3@test.com", Password = "!Password3", Username = "test3", EmployeeID = 3, };
+            AuthenticateRequest authenticateRequest = new AuthenticateRequest { Email = "test1@test.com", Password = "!Password1" };
+            UpdateRequest updateRequest = new UpdateRequest { Username = "test2", Email = "test2@test.com", Phonenumber = "0987654321", Role = "CountryManager" };
+            AuthenticateRequest authenticateRequest2 = new AuthenticateRequest { Email = "test2@test.com", Password = "!Password2" };
+            UpdateRequest updateRequest2 = new UpdateRequest { Username = "test2", Email = "test2@test.com", Phonenumber = "0987654321", Role = "Admin" };
+            string userToDelete = "test3";
+
             bool menuBool = true;
 
             while (menuBool)
@@ -39,41 +48,74 @@ namespace JwtTentaClient
                     case "s":
                         try
                         {
-                            var resPost = await PostUser();
-                            Console.WriteLine(resPost.ToString() + "\n" + "\n");
+                            var resPost1 = await PostUser(registerRequest1);
+                            Console.WriteLine(resPost1 + "\n" + "\n");
+                            var resPost2 = await PostUser(registerRequest2);
+                            Console.WriteLine(resPost2 + "\n" + "\n");
+                            var resPost3 = await PostUser(registerRequest3);
+                            Console.WriteLine(resPost3 + "\n" + "\n");
 
-                            var resAuth = await AuthUser();
+                            var resAuth = await AuthUser(authenticateRequest);
+                            if (!resAuth.Success)
+                                Console.WriteLine(resAuth.ErrorMessage + "\n" + "\n");
+
                             Console.WriteLine(resAuth.ToString() + "\n" + "\n");
 
-                            var resGetMy = await GetMyOrders(resAuth.JwtToken, 1);
-                            foreach (var x in resGetMy)
-                            {
-                                Console.WriteLine(x.OrderDate + x.ShipCountry + "\n");
-                            }
+                            var resAuth2 = await AuthUser(authenticateRequest2);
+                            if (!resAuth2.Success)
+                                Console.WriteLine(resAuth2.ErrorMessage + "\n" + "\n");
 
-                            var resGetAll = await GetAllOrders(resAuth.JwtToken);
-                            foreach (var x in resGetAll)
-                            {
-                                Console.WriteLine(x.OrderDate + x.ShipCountry + "\n");
-                            }
+                            Console.WriteLine(resAuth2.ToString() + "\n" + "\n");
 
-                            var resGetCountry = await GetCountryOrders(resAuth.JwtToken, "USA");
-                            foreach (var x in resGetCountry)
-                            {
-                                Console.WriteLine(x.OrderDate + x.ShipCountry + "\n");
-                            }
+                            var resUpdate = await UpdateUser(resAuth.JwtToken, updateRequest);
+                            Console.WriteLine(resUpdate + "\n" + "\n");
 
-                            var resUpdate = await UpdateUser(resAuth.JwtToken);
-                            Console.WriteLine(resUpdate.ToString() + "\n" + "\n");
+                            var resUpdate2 = await UpdateUser(resAuth2.JwtToken, updateRequest2);
+                            Console.WriteLine(resUpdate2 + "\n" + "\n");
 
                             var resGetAllUsers = await GetAllUsers(resAuth.JwtToken);
-                            foreach (var x in resGetAllUsers)
+                            if (resGetAllUsers != null)
                             {
-                                Console.WriteLine(x.Username + "\n");
+                                foreach (var x in resGetAllUsers)
+                                {
+                                    Console.WriteLine("Username: " + x.Username + " Created: " + x.Created + "\n");
+                                }
                             }
+                            else Console.WriteLine("No objects found\n");
 
-                            var resDelete = await DeleteUser(resAuth.JwtToken, "test1");
-                            Console.WriteLine(resDelete.ToString() + "\n" + "\n");
+                            var resDelete = await DeleteUser(resAuth.JwtToken, userToDelete);
+                            Console.WriteLine(resDelete + "\n" + "\n");
+
+                            var resGetMy = await GetMyOrders(resAuth.JwtToken, 1);
+                            if (resGetMy != null)
+                            {
+                                foreach (var x in resGetMy)
+                                {
+                                    Console.WriteLine(x.OrderDate + x.ShipCountry + "\n");
+                                }
+                            }
+                            else Console.WriteLine("No objects found\n");
+
+
+                            var resGetAll = await GetAllOrders(resAuth.JwtToken);
+                            if (resGetAll != null)
+                            {
+                                foreach (var x in resGetAll)
+                                {
+                                    Console.WriteLine(x.OrderDate + x.ShipCountry + "\n");
+                                }
+                            }
+                            else Console.WriteLine("No objects found\n");
+
+                            var resGetCountry = await GetCountryOrders(resAuth.JwtToken, "USA");
+                            if (resGetCountry != null)
+                            {
+                                foreach (var x in resGetCountry)
+                                {
+                                    Console.WriteLine(x.OrderDate + x.ShipCountry + "\n");
+                                }
+                            }
+                            else Console.WriteLine("No objects found\n");
                         }
                         catch (Exception e)
                         {
@@ -94,12 +136,10 @@ namespace JwtTentaClient
             }
         }
 
-        public static async Task<string> PostUser()
+        public static async Task<string> PostUser(RegisterRequest request)
         {
-            var user = new RegisterRequest { Email = "test1@test.com", Password = "!Password1", Username = "test1", EmployeeID = 2, };
-
             var endpoint = "user/register";
-            var jsonRequest = JsonConvert.SerializeObject(user);
+            var jsonRequest = JsonConvert.SerializeObject(request);
             var postRequest = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
             using (var client = new HttpClient())
             {
@@ -131,12 +171,10 @@ namespace JwtTentaClient
                 return result.ToString();
             }
         }
-        public static async Task<string> UpdateUser(string token)
+        public static async Task<string> UpdateUser(string token, UpdateRequest request)
         {
-            var user = new UpdateRequest { Email = "test@test.com", Phonenumber = "0987654321", Username = "test"};
-
             var endpoint = "user/update";
-            var jsonRequest = JsonConvert.SerializeObject(user);
+            var jsonRequest = JsonConvert.SerializeObject(request);
             var postRequest = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
             using (var client = new HttpClient())
             {
@@ -168,18 +206,17 @@ namespace JwtTentaClient
             }
         }
 
-        public static async Task<AuthenticateResponse> AuthUser()
+        public static async Task<AuthenticateResponse> AuthUser(AuthenticateRequest request)
         {
-            var user = new AuthenticateRequest { Email = "test@test.com", Password = "!Password1" };
             var endpoint = "user/login";
-            var jsonRequest = JsonConvert.SerializeObject(user);
+            var jsonRequest = JsonConvert.SerializeObject(request);
             var postRequest = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
             using (var client = new HttpClient())
             {
                 var response = await client.PostAsync(url + endpoint, postRequest);
                 if (response.IsSuccessStatusCode == false)
-                    return null;
+                    return new AuthenticateResponse { ErrorMessage = response.StatusCode.ToString(), Success = false };
 
                 var jsonResult = await response.Content.ReadAsStringAsync();
                 var result = JsonConvert.DeserializeObject<AuthenticateResponse>(jsonResult);
@@ -196,8 +233,11 @@ namespace JwtTentaClient
                     exist.RefreshToken = result.RefreshToken;
                 }
 
-                await context.SaveChangesAsync();
+                var success = await context.SaveChangesAsync();
+                if (success == 0)
+                    return new AuthenticateResponse { ErrorMessage = "Could not save user localy", Success = false };
 
+                result.Success = true;
                 return result;
             }
         }

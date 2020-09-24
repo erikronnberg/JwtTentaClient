@@ -12,7 +12,7 @@ namespace JwtTentaClient.Models
 
         public override string ToString()
         {
-            return "Username: " + Username + "\nEmail: " + Email;
+            return "Username: " + Username + " Email: " + Email;
         }
     }
 }
