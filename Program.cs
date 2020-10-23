@@ -31,6 +31,7 @@ namespace JwtTentaClient
             UpdateRequest updateRequest = new UpdateRequest { Username = "test2", Email = "test2@test.com", Phonenumber = "0987654321", Role = "CountryManager" };
             AuthenticateRequest authenticateRequest2 = new AuthenticateRequest { Email = "test2@test.com", Password = "!Password2" };
             UpdateRequest updateRequest2 = new UpdateRequest { Username = "test2", Email = "test2@test.com", Phonenumber = "0987654321", Role = "Admin" };
+            UpdateRequest updateRequest3 = new UpdateRequest { Username = "test2", Email = "test2@test.com", Phonenumber = "0987654321", Role = "VD" };
             string userToDelete = "test3";
 
             bool menuBool = true;
@@ -75,6 +76,9 @@ namespace JwtTentaClient
                             var resUpdate2 = await UpdateUser(resAuth2.JwtToken, updateRequest2);
                             Console.WriteLine(resUpdate2 + "\n" + "\n");
 
+                            var resUpdate3 = await UpdateUser(resAuth2.JwtToken, updateRequest3);
+                            Console.WriteLine(resUpdate3 + "\n" + "\n");
+
                             var resGetAllUsers = await GetAllUsers(resAuth.JwtToken);
                             if (resGetAllUsers != null)
                             {
@@ -99,7 +103,7 @@ namespace JwtTentaClient
                             else Console.WriteLine("No objects found or token is expired\n");
 
 
-                            var resGetAll = await GetAllOrders(resAuth.JwtToken);
+                            var resGetAll = await GetAllOrders(resAuth2.JwtToken);
                             if (resGetAll != null)
                             {
                                 foreach (var x in resGetAll)
