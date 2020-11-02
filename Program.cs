@@ -24,12 +24,12 @@ namespace JwtTentaClient
         protected static readonly DataContext context = new DataContext();
         static async Task Main(string[] args)
         {
-            RegisterRequest registerRequest1 = new RegisterRequest { Email = "test1@test.com", Password = "!Password1", Username = "test1", EmployeeID = 1, };
-            RegisterRequest registerRequest2 = new RegisterRequest { Email = "test2@test.com", Password = "!Password2", Username = "test2", EmployeeID = 2, };
-            RegisterRequest registerRequest3 = new RegisterRequest { Email = "test3@test.com", Password = "!Password3", Username = "test3", EmployeeID = 3, };
-            AuthenticateRequest authenticateRequest = new AuthenticateRequest { Email = "test1@test.com", Password = "!Password1" };
+            RegisterRequest registerRequest1 = new RegisterRequest { Email = "test1@test.com", Password = "!Password123456789", Username = "test1", EmployeeID = 1, };
+            RegisterRequest registerRequest2 = new RegisterRequest { Email = "test2@test.com", Password = "!Password123456789", Username = "test2", EmployeeID = 2, };
+            RegisterRequest registerRequest3 = new RegisterRequest { Email = "test3@test.com", Password = "!Password123456789", Username = "test3", EmployeeID = 3, };
+            AuthenticateRequest authenticateRequest = new AuthenticateRequest { Email = "test1@test.com", Password = "!Password123456789" };
             UpdateRequest updateRequest = new UpdateRequest { Username = "test2", Email = "test2@test.com", Phonenumber = "0987654321", Role = "CountryManager" };
-            AuthenticateRequest authenticateRequest2 = new AuthenticateRequest { Email = "test2@test.com", Password = "!Password2" };
+            AuthenticateRequest authenticateRequest2 = new AuthenticateRequest { Email = "test2@test.com", Password = "!Password123456789" };
             UpdateRequest updateRequest2 = new UpdateRequest { Username = "test2", Email = "test2@test.com", Phonenumber = "0987654321", Role = "Admin" };
             UpdateRequest updateRequest3 = new UpdateRequest { Username = "test2", Email = "test2@test.com", Phonenumber = "0987654321", Role = "VD" };
             string userToDelete = "test3";
@@ -51,6 +51,7 @@ namespace JwtTentaClient
                     case "s":
                         try
                         {
+                            Console.WriteLine("POSTING NEW USERS\n" + "\n");
                             var resPost1 = await PostUser(registerRequest1);
                             Console.WriteLine(resPost1 + "\n" + "\n");
                             var resPost2 = await PostUser(registerRequest2);
@@ -58,6 +59,7 @@ namespace JwtTentaClient
                             var resPost3 = await PostUser(registerRequest3);
                             Console.WriteLine(resPost3 + "\n" + "\n");
 
+                            Console.WriteLine("AUTHENTICATE NEW USERS\n" + "\n");
                             var resAuth = await AuthUser(authenticateRequest);
                             if (!resAuth.Success)
                                 Console.WriteLine(resAuth.ErrorMessage + "\n" + "\n");
@@ -70,6 +72,7 @@ namespace JwtTentaClient
 
                             Console.WriteLine(resAuth2.ToString() + "\n" + "\n");
 
+                            Console.WriteLine("UPDATE USERS\n" + "\n");
                             var resUpdate = await UpdateUser(resAuth.JwtToken, updateRequest);
                             Console.WriteLine(resUpdate + "\n" + "\n");
 
@@ -79,6 +82,7 @@ namespace JwtTentaClient
                             var resUpdate3 = await UpdateUser(resAuth2.JwtToken, updateRequest3);
                             Console.WriteLine(resUpdate3 + "\n" + "\n");
 
+                            Console.WriteLine("GET REQUESTS\n" + "\n");
                             var resGetAllUsers = await GetAllUsers(resAuth.JwtToken);
                             if (resGetAllUsers != null)
                             {
