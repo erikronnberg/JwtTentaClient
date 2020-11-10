@@ -27,6 +27,7 @@ namespace JwtTentaClient
             RegisterRequest registerRequest1 = new RegisterRequest { Email = "test1@test.com", Password = "!Password123456789", Username = "test1", EmployeeID = 1, };
             RegisterRequest registerRequest2 = new RegisterRequest { Email = "test2@test.com", Password = "!Password123456789", Username = "test2", EmployeeID = 2, };
             RegisterRequest registerRequest3 = new RegisterRequest { Email = "test3@test.com", Password = "!Password123456789", Username = "test3", EmployeeID = 3, };
+            RegisterRequest registerRequest4 = new RegisterRequest { Email = "test4@test.com", Password = "!Password123456789", Username = "test4", EmployeeID = 4, };
             AuthenticateRequest authenticateRequest = new AuthenticateRequest { Email = "test1@test.com", Password = "!Password123456789" };
             UpdateRequest updateRequest = new UpdateRequest { Username = "test2", Email = "test2@test.com", Phonenumber = "0987654321", Role = "CountryManager" };
             AuthenticateRequest authenticateRequest2 = new AuthenticateRequest { Email = "test2@test.com", Password = "!Password123456789" };
@@ -58,6 +59,8 @@ namespace JwtTentaClient
                             Console.WriteLine(resPost2 + "\n" + "\n");
                             var resPost3 = await PostUser(registerRequest3);
                             Console.WriteLine(resPost3 + "\n" + "\n");
+                            var resPost4 = await PostUser(registerRequest4);
+                            Console.WriteLine(resPost4 + "\n" + "\n");
 
                             Console.WriteLine("AUTHENTICATE NEW USERS\n" + "\n");
                             var resAuth = await AuthUser(authenticateRequest);
@@ -348,6 +351,21 @@ namespace JwtTentaClient
 
                 var jsonResult = await response.Content.ReadAsStringAsync();
                 var result = JsonConvert.DeserializeObject<IEnumerable<OrderResponse>>(jsonResult);
+                return result;
+            }
+        }
+        public static async Task<AccountResponse> RefreshToken(string token)
+        {
+            var endpoint = "user/refresh-token";
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await client.GetAsync(url + endpoint);
+                if (response.IsSuccessStatusCode == false)
+                    return null;
+
+                var jsonResult = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<AccountResponse>(jsonResult);
                 return result;
             }
         }
